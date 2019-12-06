@@ -1,0 +1,53 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+      - args:
+        - -provider=google
+        - -upstream=file:///dev/null
+        - -http-address=0.0.0.0:4180
+        - -client-id=xxxxxxxxxxx-jg4h728al7q7lg7nkheo2un3098tj8cq.apps.googleusercontent.com
+        - -client-secret=xxxxxxxxxxxxx
+        - -cookie-domain=.db.sandeepchowdary.in
+        - -cookie-refresh=1h
+        - -cookie-secret=aMzkVWMc/cqw30pxLZ3Vpw==
+        - -email-domain=*  
+        image: quay.io/pusher/oauth2_proxy:latest
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+  - name: http
+    port: 4180
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    app: oauth2-proxy
+ #1032427335693
+ #m37L6Mig8vjytx61ApDCv7M_

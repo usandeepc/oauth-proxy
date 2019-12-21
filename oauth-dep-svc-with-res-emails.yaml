@@ -1,0 +1,62 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+      - args:
+        - -provider=github
+        - -auth-logging=true
+        - -upstream=file:///dev/null
+        - -http-address=0.0.0.0:4180
+        - -client-id=79c17ec4834593863c80
+        - -client-secret=93fbbd3a6d30967898268f4bd539542ef7341d3d
+        - -cookie-domain=.sandeepchowdary.in
+        - -cookie-refresh=1h
+        - -cookie-secret=aMzkVWMc/cqw30pxLZ3Vpw==
+        - -email-domain=*
+          #- --authenticated-emails-file=/etc/oauth2/users-list.yaml
+        - -github-org=test-dashboard
+        - -github-team=test-dashboard
+        image: quay.io/pusher/oauth2_proxy:latest
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          protocol: TCP
+        volumeMounts:
+         - name: users-list
+           mountPath: /etc/oauth2/
+      volumes:
+        - name: users-list
+          configMap:
+             name: users-list
+##kubectl create configmap users-list --from-file=users-list.yaml -n kubernetes-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: oauth2-proxy
+  name: oauth2-proxy
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+  - name: http
+    port: 4180
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    app: oauth2-proxy
